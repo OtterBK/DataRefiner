@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\miso\\Desktop\\source\\DataRefiner\\DataRefiner\\DataRefiner.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\miso\\Desktop\\source\\DataRefiner\\DataRefiner\\DataRefiner.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\miso\\Desktop\\source\\DataRefiner\\DataRefiner\\DataRefiner.csproj",
+        "projectName": "DataRefiner",
+        "projectPath": "C:\\Users\\miso\\Desktop\\source\\DataRefiner\\DataRefiner\\DataRefiner.csproj",
+        "packagesPath": "C:\\Users\\miso\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\miso\\Desktop\\source\\DataRefiner\\DataRefiner\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\miso\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net472"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net472": {
+            "targetAlias": "net472",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net472": {
+          "targetAlias": "net472",
+          "dependencies": {
+            "NLog": {
+              "target": "Package",
+              "version": "[4.7.13, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Npgsql": {
+              "target": "Package",
+              "version": "[6.0.3, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win7-x86": {
+          "#import": []
+        }
+      }
+    }
+  }
+}
