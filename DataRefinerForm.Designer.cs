@@ -66,10 +66,10 @@ namespace DataRefinerModule {
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(371, 192);
+            this.progressBar1.Location = new System.Drawing.Point(224, 394);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(196, 15);
+            this.progressBar1.Size = new System.Drawing.Size(500, 17);
             this.progressBar1.TabIndex = 2;
             // 
             // processTime
@@ -94,12 +94,10 @@ namespace DataRefinerModule {
             // 
             // rd_address_type_reg
             // 
-            this.rd_address_type_reg.Checked = true;
             this.rd_address_type_reg.Location = new System.Drawing.Point(422, 236);
             this.rd_address_type_reg.Name = "rd_address_type_reg";
             this.rd_address_type_reg.Size = new System.Drawing.Size(47, 16);
             this.rd_address_type_reg.TabIndex = 5;
-            this.rd_address_type_reg.TabStop = true;
             this.rd_address_type_reg.Text = "지번";
             this.rd_address_type_reg.UseVisualStyleBackColor = true;
             // 
@@ -109,12 +107,12 @@ namespace DataRefinerModule {
             this.rd_address_type_load.Name = "rd_address_type_load";
             this.rd_address_type_load.Size = new System.Drawing.Size(59, 16);
             this.rd_address_type_load.TabIndex = 5;
-            this.rd_address_type_load.TabStop = true;
             this.rd_address_type_load.Text = "도로명";
             this.rd_address_type_load.UseVisualStyleBackColor = true;
             // 
             // rd_address_type_sgg
             // 
+            this.rd_address_type_sgg.Checked = true;
             this.rd_address_type_sgg.Location = new System.Drawing.Point(422, 280);
             this.rd_address_type_sgg.Name = "rd_address_type_sgg";
             this.rd_address_type_sgg.Size = new System.Drawing.Size(59, 16);

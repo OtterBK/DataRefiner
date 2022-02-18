@@ -6,10 +6,11 @@ using System.Collections.Generic;
 
 namespace DataRefinerModule.DBUtility {
 
-    public class DBConnector {
+    public class DBConnector : IDisposable{
 
 
         private static Logger _logger = LogManager.GetCurrentClassLogger();
+
         private const string defaultConnectionString = "HOST=192.168.0.30;"
                                                     + "PORT=4432;"
                                                     + "USERNAME=postgres;"
@@ -17,6 +18,7 @@ namespace DataRefinerModule.DBUtility {
                                                     + "DATABASE=data_refine;";
 
         private static DBConnector instance = new DBConnector(defaultConnectionString);
+
         public static DBConnector GetDefaultConnector() {
             return instance;
         }
@@ -127,8 +129,13 @@ namespace DataRefinerModule.DBUtility {
                 conn = new NpgsqlConnection(connectionString);
                 conn.Open();
             } catch (Exception exc) {
+                conn = null;
                 _logger.Error(exc, "db connecting error");
             }
+
+        }
+
+        public DBConnector() : this(defaultConnectionString) {
 
         }
 
@@ -244,5 +251,8 @@ namespace DataRefinerModule.DBUtility {
             return singleObject;
         }
 
+        public void Dispose() {
+            if (conn != null) conn.Close();
+        }
     }
 }

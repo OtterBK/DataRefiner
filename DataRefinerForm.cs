@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static DataRefinerModule.Refiner.DataSetRefiner;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace DataRefinerModule {
@@ -105,6 +106,16 @@ namespace DataRefinerModule {
         }
 
         private void DataSetRefine(string filePath) {
+
+            if (rd_address_type_reg.Checked)
+                addressType = 0;
+            else if (rd_address_type_load.Checked)
+                addressType = 1;
+            else if (rd_address_type_sgg.Checked)
+                addressType = 2;
+
+            Console.WriteLine("address type: " + addressType);
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -129,11 +140,24 @@ namespace DataRefinerModule {
                     dataSetRefiner.AddRows(values);
                 }
 
+                ThreadCallbackInfo threadCallbackInfo = new ThreadCallbackInfo();
+                threadCallbackInfo.RefinedStore = refinedRows;
+
+                //refinedRows = dataSetRefiner.RefineDataSet();
+                dataSetRefiner.RefineDataSetWithThread(threadCallbackInfo);
+
                 progressBar1.Minimum = 0;
-                progressBar1.Maximum = rows.Count;
+                progressBar1.Maximum = dataSetRefiner.Rows.Count;
                 progressBar1.Step = 1;
 
-                refinedRows = dataSetRefiner.RefineDataSet();
+                while (!threadCallbackInfo.IsDone) {
+                    Thread.Sleep(10);
+                    progressBar1.Value = dataSetRefiner.ProgressCount;
+                    progressBar1.Update();
+                }
+
+                refinedRows = threadCallbackInfo.RefinedStore;
+
             }
 
             stopwatch.Stop();
@@ -141,14 +165,13 @@ namespace DataRefinerModule {
             if (refinedRows != null) {
                 filePath = filePath.Replace(".csv", "_refined.csv");
 
-                using (StreamWriter file = File.CreateText(filePath)) {
+                using (StreamWriter file = new StreamWriter(filePath, false, System.Text.Encoding.GetEncoding("euc-kr"))) {
                     file.WriteLine(columnLine);
 
                     foreach (string[] row in refinedRows) {
-                        foreach (string value in row) {
-                            file.Write(value);
-                        }
-                        file.WriteLine("\r\n");
+                        string line = string.Join(",", row);
+                        Console.WriteLine(line);
+                        file.WriteLine(line);
                     }
 
                     file.Flush();

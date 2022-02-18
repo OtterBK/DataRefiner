@@ -18,14 +18,16 @@ namespace DataRefinerModule.Refiner {
 
         private string[] _numberComma = new string[] {
             ",",
+            "\"",
+            "\'",
         };
 
-        private AddressRegExplorer _addressRegExplorer = new AddressRegExplorer();
-        private AddressLoadExplorer _addressLoadExplorer = new AddressLoadExplorer();
-        private AddressSggExplorer _addressSggExplorer = new AddressSggExplorer();
+        private List<string> _addressPattern;
 
         private char _addressSeparator = ' ';
         private string _dbWildcardSymbol = "%";
+
+        public bool Mode_PatternOverride = true;
 
         public DataRefiner() {
 
@@ -52,6 +54,9 @@ namespace DataRefinerModule.Refiner {
 
                 //주소 시도
                 if (ExtractAddress(refinedData)) return refinedData;
+
+                //텍스트 시도
+                if (ExtractText(refinedData)) return refinedData;
             }
 
             return refinedData;
@@ -70,9 +75,11 @@ namespace DataRefinerModule.Refiner {
                     case DataType.DATE: ExtractDateTime(refinedData); break;
                     case DataType.DATETIME: ExtractDateTime(refinedData); break;
 
-                    case DataType.NUMERIC: ExtractDateTime(refinedData); break;
+                    case DataType.NUMERIC: ExtractNumeric(refinedData); break;
 
                     case DataType.ADDRESS: ExtractAddress(refinedData); break;
+                    case DataType.ADDRESS_LOAD: ExtractAddress(refinedData); break;
+                    case DataType.ADDRESS_REG: ExtractAddress(refinedData); break;
 
                     case DataType.TEXT: ExtractText(refinedData); break;
 
@@ -177,25 +184,24 @@ namespace DataRefinerModule.Refiner {
 
             AddressExplorer addressExplorer = null;
 
-            if (DataRefinerForm.addressType == 0) addressExplorer = _addressRegExplorer;
-            else if (DataRefinerForm.addressType == 1) addressExplorer = _addressLoadExplorer;
-            else if (DataRefinerForm.addressType == 2) addressExplorer = _addressSggExplorer;
+            if (DataRefinerForm.addressType == 0) addressExplorer = new AddressRegExplorer();
+            else if (DataRefinerForm.addressType == 1) addressExplorer = new AddressLoadExplorer();
+            else if (DataRefinerForm.addressType == 2) addressExplorer = new AddressSggExplorer();
 
-            //addressExplorer = _addressSggExplorer;
             string refinedAddress = string.Empty;
 
             string[] depths = baseData.Split(_addressSeparator);
 
             bool isFindPattern = false;
             //패턴 기반 탐색(여러 데이터 정제시 유효)
-            if (addressExplorer.HasPattern()) { //이미 분석한 addressPattern 이 있다면
+            if (_addressPattern != null) { //이미 분석한 addressPattern 이 있다면
+                addressExplorer.SetAddressPattern(_addressPattern); //address 패턴 적용
                 addressExplorer.SetDepths(depths); //패턴에 맞춰 depths 적용
                 string tmpAddress = addressExplorer.GetAddress(fullAddress: true); //주소 있는지 찾아봄
                 if (tmpAddress != string.Empty) {//있다면
                     isFindPattern = true;
                     refinedAddress = tmpAddress;
                 }
-
             }
 
             //기존 패턴이 없다면
@@ -205,6 +211,7 @@ namespace DataRefinerModule.Refiner {
             
             //찾은 패턴이 있다면
             if (isFindPattern) {
+                if(Mode_PatternOverride) _addressPattern = addressExplorer.AddressPattern; //패턴 저장
                 int validDepthCount = addressExplorer.GetValidDepthCount();
 
                 if(refinedAddress == string.Empty) 
@@ -234,6 +241,7 @@ namespace DataRefinerModule.Refiner {
 
             refinedData.Refined = baseData;
             refinedData.DataType = DataType.TEXT;
+            isFind = true;
 
             return isFind;
         }

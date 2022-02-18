@@ -108,6 +108,7 @@ namespace DataRefinerModule.AddressModule {
         }
 
         public string GetNextDepthFieldName() {
+            if (_depthList.Count == _maxDepth) return string.Empty;
             return fieldNm_depthBase + (_depthList.Count).ToString();
         }
 
@@ -226,24 +227,24 @@ namespace DataRefinerModule.AddressModule {
         /// <param name="baseSido">정제할 시/도명</param>
         /// <returns></returns>
         public string GetRefinedSidoName(string baseSido) {
-            DBConnector dbConn = DBConnector.GetDefaultConnector();
+            using(DBConnector dbConn = new DBConnector()){
+                List<string> selectList = new List<string> {
+                    fieldNm_sido_std_name,
+                };
+                string selectString = DBConnector.GetSelectString(selectList);
 
-            List<string> selectList = new List<string> {
-                fieldNm_sido_std_name,
-            };
-            string selectString = DBConnector.GetSelectString(selectList);
+                List<string> idFields = new List<string>() {
+                    fieldNm_sido_name,
+                };
+                List<string> idValues = new List<string>() {
+                    baseSido,
+                };
+                string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND");
 
-            List<string> idFields = new List<string>() {
-                fieldNm_sido_name,
-            };
-            List<string> idValues = new List<string>() {
-                baseSido,
-            };
-            string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND");
+                string result = dbConn.SelectSingleObjectPostgreSql($"SELECT {selectString} FROM {_relationSidoDict} WHERE {conditionString}");
 
-            string result = dbConn.SelectSingleObjectPostgreSql($"SELECT {selectString} FROM {_relationSidoDict} WHERE {conditionString}");
-
-            return result;
+                return result;
+            }
         }
 
         /// <summary>
@@ -252,29 +253,30 @@ namespace DataRefinerModule.AddressModule {
         /// <returns></returns>
         public List<string> NextNodeSearch() {
 
-            DBConnector dbConn = DBConnector.GetDefaultConnector();
+            using(DBConnector dbConn = new DBConnector()){
+                List<string> resultList = new List<string>();
+                string nextDepthFieldName = GetNextDepthFieldName();
+                if (nextDepthFieldName == string.Empty) return resultList;
 
-            List<string> resultList = new List<string>();
-            string nextDepthFieldName = GetNextDepthFieldName();
-
-            List<string> selectList = new List<string> {
+                List<string> selectList = new List<string> {
                     nextDepthFieldName,
-            };
-            string selectString = DBConnector.GetSelectString(selectList);
+                };
+                string selectString = DBConnector.GetSelectString(selectList);
 
-            List<string> idFields = GetDepthFieldList();
-            List<string> idValues = GetDepthValueList();
-            string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND", "LIKE");
+                List<string> idFields = GetDepthFieldList();
+                List<string> idValues = GetDepthValueList();
+                string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND", "LIKE");
 
-            List<string[]> resultSet = dbConn.SelectPostgreSql($"SELECT DISTINCT {selectString} FROM {_relation} WHERE {conditionString}");
-            if (resultSet == null || resultSet.Count == 0) return resultList;
+                List<string[]> resultSet = dbConn.SelectPostgreSql($"SELECT DISTINCT {selectString} FROM {_relation} WHERE {conditionString}");
+                if (resultSet == null || resultSet.Count == 0) return resultList;
 
-            foreach (string[] row in resultSet) {
-                string value = row[0];
-                resultList.Add(value);
+                foreach (string[] row in resultSet) {
+                    string value = row[0];
+                    resultList.Add(value);
+                }
+
+                return resultList;
             }
-
-            return resultList;
 
         }
 
@@ -284,29 +286,31 @@ namespace DataRefinerModule.AddressModule {
         /// <returns></returns>
         public List<string> SiblingNodeSearch() {
 
-            DBConnector dbConn = DBConnector.GetDefaultConnector();
+            using(DBConnector dbConn = new DBConnector()){
+                List<string> resultList = new List<string>();
+                string siblingDepthFieldName = GetNextDepthFieldName();
 
-            List<string> resultList = new List<string>();
-            string siblingDepthFieldName = GetNextDepthFieldName();
-
-            List<string> selectList = new List<string> {
+                List<string> selectList = new List<string> {
                     siblingDepthFieldName,
-            };
-            string selectString = DBConnector.GetSelectString(selectList);
+                };
+                string selectString = DBConnector.GetSelectString(selectList);
 
-            List<string> idFields = GetDepthFieldList();
-            List<string> idValues = GetDepthValueList();
-            string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND", "LIKE");
+                List<string> idFields = GetDepthFieldList();
+                List<string> idValues = GetDepthValueList();
+                string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND", "LIKE");
 
-            List<string[]> resultSet = dbConn.SelectPostgreSql($"SELECT DISTINCT {selectString} FROM {_relation} WHERE {conditionString}");
-            if (resultSet == null || resultSet.Count == 0) return resultList;
+                List<string[]> resultSet = dbConn.SelectPostgreSql($"SELECT DISTINCT {selectString} FROM {_relation} WHERE {conditionString}");
+                if (resultSet == null || resultSet.Count == 0) return resultList;
 
-            foreach (string[] row in resultSet) {
-                string value = row[0];
-                resultList.Add(value);
+                foreach (string[] row in resultSet) {
+                    string value = row[0];
+                    resultList.Add(value);
+                }
+
+                return resultList;
             }
 
-            return resultList;
+            
 
         }
 
@@ -316,39 +320,39 @@ namespace DataRefinerModule.AddressModule {
         /// <returns></returns>
         public string GetAddress(bool fullAddress = false) {
 
-            DBConnector dbConn = DBConnector.GetDefaultConnector();
+            using (DBConnector dbConn = new DBConnector()) {
+                List<string> selectList;
+                if (fullAddress) {
+                    selectList = GetAllDepthFieldName();
+                } else {
+                    selectList = GetPatternDepthFieldName();
+                }
+                string selectString = DBConnector.GetSelectString(selectList);
 
-            List<string> selectList;
-            if (fullAddress) {
-                selectList = GetAllDepthFieldName();
-            } else {
-                selectList = GetPatternDepthFieldName();
+                List<string> idFields = GetDepthFieldList();
+                List<string> idValues = GetDepthValueList();
+                string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND", "LIKE");
+
+                List<string[]> resultSet = dbConn.SelectPostgreSql($"SELECT DISTINCT {selectString} FROM {_relation} WHERE {conditionString}");
+                if (resultSet == null || resultSet.Count == 0) return string.Empty;
+
+                string[] valueSet = resultSet[0];
+
+                string address = string.Empty;
+
+                int validValueCount = GetValidDepthCount();
+
+                for (var i = 0; i < _addressPattern.Count; i++) {
+                    string symbol = _addressPattern[i];
+                    if (!fullAddress && symbol == _symbolNull) continue;
+
+                    if (i >= valueSet.Length) break;
+
+                    address += valueSet[i] + _addressSeparator;
+                }
+
+                return address.Trim();
             }
-            string selectString = DBConnector.GetSelectString(selectList);
-
-            List<string> idFields = GetDepthFieldList();
-            List<string> idValues = GetDepthValueList();
-            string conditionString = DBConnector.GetConditionString(idFields, idValues, "AND", "LIKE");
-
-            List<string[]> resultSet = dbConn.SelectPostgreSql($"SELECT DISTINCT {selectString} FROM {_relation} WHERE {conditionString}");
-            if (resultSet == null || resultSet.Count == 0) return string.Empty;
-
-            string[] valueSet = resultSet[0];
-
-            string address = string.Empty;
-
-            int validValueCount = GetValidDepthCount();
-
-            for (var i = 0; i < _addressPattern.Count; i++) {
-                string symbol = _addressPattern[i];
-                if (!fullAddress && symbol == _symbolNull) continue;
-
-                if (i >= valueSet.Length) break;
-
-                address += valueSet[i] + _addressSeparator;
-            }
-
-            return address.Trim();
 
         }
 
@@ -414,6 +418,25 @@ namespace DataRefinerModule.AddressModule {
             _addressPattern = pattern;
 
             return true;
+        }
+
+        /// <summary>
+        /// addressPattern 설정
+        /// </summary>
+        /// <returns></returns>
+        public bool SetAddressPattern(List<string> addressPatttern) {
+
+            _addressPattern.Clear();
+            for (var i = 0; i < addressPatttern.Count; i++) {
+                if(i >= _maxDepth) {
+                    break;
+                }
+                string pattern = addressPatttern[i];
+                _addressPattern.Add(pattern);
+            }
+
+            return true;
+
         }
 
         /// <summary>
