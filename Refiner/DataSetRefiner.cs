@@ -40,7 +40,7 @@ namespace DataRefinerModule.Refiner {
 
         public DataSetRefiner() {
             _dataRefiner = new DataRefiner();
-            //패턴 재분석 모드 off, 데이터셋 정제기에서는 정제 과정에서 패턴이 바뀌면 안됨
+            //패턴 덮어쓰기 모드 off, 데이터셋 정제기에서는 정제 과정에서 패턴이 바뀌면 안됨
             _dataRefiner.Mode_PatternOverride = false; 
         }
 
