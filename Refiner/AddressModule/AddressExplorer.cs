@@ -444,7 +444,6 @@ namespace DataRefinerModule.AddressModule {
         /// </summary>
         /// <returns></returns>
         public bool SetDepths(string[] depths) {
-
             _depthList.Clear();
             for(var i = 0; i < _addressPattern.Count; i++) {
                 string symbol = _addressPattern[i];
